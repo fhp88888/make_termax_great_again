@@ -7,23 +7,25 @@ from datetime import datetime
 
 
 class Prompt:
+    # 初始化 Prompt 类，加载系统和路径元数据，并设置 memory 实例
     def __init__(self, memory):
         """
         Prompt for Termax: the prompt for the LLMs.
         Args:
             memory: the memory instance.
         """
-        # TODO: make the sync of system related metadata once happened at the initialization
+        # TODO：让系统相关元数据的同步只在初始化时发生
         self.system_metadata = get_system_metadata()
         self.path_metadata = get_path_metadata()
         # self.command_history = get_command_history()
 
-        # share the same memory instance.
+        # 共享同一个 memory 实例。
         if memory is None:
             self.memory = Memory()
         else:
             self.memory = memory
 
+    # 生成命令建议提示词，根据环境和历史信息生成 LLM 输入
     def gen_suggestions(self, primary: str, model: str = CONFIG_SEC_OPENAI):
         """
         [Prompt] Generate the suggestions based on the environment and the history.
@@ -77,7 +79,7 @@ class Prompt:
                 """
             )
         else:
-            # TODO: add more models specific prompt
+            # TODO：添加更多模型专用的 prompt
             return textwrap.dedent(
                 f"""\
                 You are an shell expert, you need to assist user to infer the next command based on
@@ -113,6 +115,7 @@ class Prompt:
                 """
             )
 
+    # 生成命令解释提示词，用于让 LLM 解释 shell 命令
     def explain_commands(self, model: str = CONFIG_SEC_OPENAI):
         """
         [Prompt] Explain the shell commands.
@@ -122,9 +125,10 @@ class Prompt:
         if model == CONFIG_SEC_OPENAI:
             return f"Help me describe this command:"
         else:
-            # TODO: add more models specific prompt
+            # TODO：添加更多模型专用的 prompt
             return f"Help me describe this command:"
 
+    # 生成命令转换提示词，将自然语言转为 shell 命令，并结合历史相似样例
     def gen_commands(self, text: str, model: str = CONFIG_SEC_OPENAI):
         """
         [Prompt] Convert the natural language text to the commands.
@@ -132,13 +136,13 @@ class Prompt:
             text: the natural language text.
             model: the model to use, default is OpenAI.
         """
-        # query the history database to get similar samples
+        # 查询历史数据库以获取相似样例
         samples = self.memory.query([text])
         metadatas = samples['metadatas'][0]
         documents = samples['documents'][0]
         distances = samples['distances'][0]
 
-        # construct a string that contains the samples in a human-readable format
+        # 构造一个包含样例的人类可读字符串
         sample_string = ""
         for i in range(len(documents)):
             sample_string += f"""
@@ -148,7 +152,7 @@ class Prompt:
             Date: {metadatas[i]['created_at']}\n
             """
 
-        # refresh the metadata
+        # 刷新元数据
         files = get_file_metadata()
         if model == CONFIG_SEC_OPENAI:
             return textwrap.dedent(
@@ -189,7 +193,7 @@ class Prompt:
                 """
             )
         else:
-            # TODO: add more models specific prompt
+            # TODO：添加更多模型专用的 prompt
             return textwrap.dedent(
                 f"""\
                 You are an shell expert, you can convert natural language text from user to shell commands.

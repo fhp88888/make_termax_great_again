@@ -1,3 +1,6 @@
+# termax.plugin.shell.zsh
+# 定义 Zsh 插件脚本内容，实现 Ctrl+k 快捷键调用 termax 处理命令行并显示进度动画。
+
 zsh_plugin = """
 # ===== Termax ZSH Plugin =====
 _termax_zsh() {

@@ -12,18 +12,18 @@ from datetime import datetime
 
 def get_git_metadata():
     """
-    get_git_metadata: Records the git information on the current workspace.
-    Returns: a dictionary of git metadata.
+    get_git_metadata：记录当前工作区的 git 信息。
+    返回值：git 元数据字典。
 
     """
 
     def run_git_command(command):
         """
-        Run a git command and return the output.
-        Args:
-            command: the git command to run.
+        运行 git 命令并返回输出。
+        参数:
+            command: 要运行的 git 命令。
 
-        Returns: the output of the git command.
+        返回值: git 命令的输出。
 
         """
         result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, shell=True)
@@ -31,7 +31,7 @@ def get_git_metadata():
             raise Exception(f"Git command failed: {result.stderr}")
         return result.stdout.strip()
 
-    # Check whether the directory is initialized with git
+    # 检查当前目录是否已初始化为 git 仓库
     if run_git_command("[ -d .git ] && echo 1 || echo 0") == "0":
         return {
             "git_sha": "",
@@ -42,17 +42,17 @@ def get_git_metadata():
             "git_latest_commit_message": ""
         }
 
-    # Get latest commit hash
+    # 获取最新提交的哈希值
     latest_commit_hash = run_git_command("git rev-parse HEAD")
     latest_commit_author = run_git_command("git log -1 --pretty=%an")
     latest_commit_message = run_git_command("git log -1 --pretty=%B")
     latest_commit_timestamp = run_git_command("git log -1 --pretty=%ct")
     latest_commit_date = datetime.utcfromtimestamp(int(latest_commit_timestamp)).strftime('%Y-%m-%d %H:%M:%S UTC')
 
-    # Get current branch name
+    # 获取当前分支名称
     current_branch = run_git_command("git rev-parse --abbrev-ref HEAD")
 
-    # Get remotes
+    # 获取远程仓库信息
     remotes_raw = run_git_command("git remote -v")
     remotes = {}
     for line in remotes_raw.split('\n'):
@@ -87,22 +87,22 @@ def get_git_metadata():
 
 def get_docker_metadata():
     """
-    Records the Docker containers and images information of the current workspace.
+    记录当前工作区的 Docker 容器和镜像信息。
     
-    Returns:
-        A dictionary with Docker containers and images metadata.
+    返回值:
+        包含 Docker 容器和镜像元数据的字典。
     """
 
     def parse_docker_output(output, headers):
         """
-        Parses the output of a Docker command into a list of dictionaries based on provided headers.
+        解析 Docker 命令输出，根据提供的表头转为字典列表。
         
-        Args:
-            output: String output from Docker command.
-            headers: List of headers that correspond to Docker output columns.
+        参数:
+            output: Docker 命令的字符串输出。
+            headers: 与 Docker 输出列对应的表头列表。
             
-        Returns:
-            List of dictionaries with Docker data.
+        返回值:
+            包含 Docker 数据的字典列表。
         """
         entries = []
         for line in output.strip().split('\n')[1:]:
@@ -113,13 +113,13 @@ def get_docker_metadata():
 
     def run_command(command):
         """
-        Executes a shell command and returns the output.
+        执行 shell 命令并返回输出。
         
-        Args:
-            command: List of command arguments.
+        参数:
+            command: 命令参数列表。
         
-        Returns:
-            A tuple of (success flag, output or error message).
+        返回值:
+            (成功标志, 输出或错误信息) 的元组。
         """
         try:
             result = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
@@ -153,9 +153,9 @@ def get_docker_metadata():
 
 def get_system_metadata():
     """
-    Records the system information.
+    记录系统信息。
 
-    Return a dictionary containing the system metadata.
+    返回值：包含系统元数据的字典。
     """
     return {
         'platform': platform.system(),
@@ -174,11 +174,11 @@ def get_system_metadata():
 
 def get_path_metadata():
     """
-    Records the path information.
+    记录 PATH 路径信息。
 
-    Return a dictionary containing the path metadata.
+    返回值：包含路径元数据的字典。
     """
-    # List all executable commands by scanning the PATH directories
+    # 扫描 PATH 目录，列出所有可执行命令
     paths = os.environ['PATH'].split(os.pathsep)
     commands = set()
     for path in paths:
@@ -189,7 +189,7 @@ def get_path_metadata():
                     if os.path.isfile(item_path) and os.access(item_path, os.X_OK):
                         commands.add(item)
             except PermissionError:
-                # This can happen if we don't have permission to list the contents of the directory
+                # 如果没有权限列出目录内容，跳过该目录
                 continue
 
     return {
@@ -202,7 +202,7 @@ def get_path_metadata():
 
 def get_file_metadata():
     """
-    get_file_metadata: Records the file information in the current directory.
+    get_file_metadata：记录当前目录下的文件信息。
     """
     result = {
         "directory": [],
@@ -211,14 +211,14 @@ def get_file_metadata():
         "invisible_directory": []
     }
 
-    # Get the current directory
+    # 获取当前目录
     current_directory = os.getcwd()
 
-    # List all files and directories in the current directory
+    # 列出当前目录下的所有文件和文件夹
     for item in os.listdir(current_directory):
-        # Build the full path of the item
+        # 构建条目的完整路径
         item_path = os.path.join(current_directory, item)
-        # Check if the item is invisible (hidden)
+        # 检查该条目是否为隐藏文件（以点开头）
         if item.startswith('.'):
             if os.path.isdir(item_path):
                 result["invisible_directory"].append(item)
@@ -235,9 +235,9 @@ def get_file_metadata():
 
 def get_python_metadata():
     """
-    get_python_metadata: Records the Python-related environment.
+    get_python_metadata：记录 Python 相关环境信息。
 
-    Return: a dictionary containing the Python-related metadata.
+    返回值：包含 Python 相关元数据的字典。
     """
     process = subprocess.run(["pip", "list"], capture_output=True, text=True)
     pip_list_lines = process.stdout.strip().split("\n")[2:]  # Skip the header lines
@@ -262,9 +262,9 @@ def get_python_metadata():
 
 def get_gpu_metadata():
     """
-    get_gpu_metadata: Records the GPU-related environment.
+    get_gpu_metadata：记录 GPU 相关环境信息。
 
-    Return: a dictionary containing the GPU-related metadata.
+    返回值：包含 GPU 相关元数据的字典。
     """
     gpu_model_name = ""
     gpu_driver_version = ""
@@ -299,12 +299,12 @@ def get_gpu_metadata():
 
 def get_command_history():
     """
-    get_command_history: Get the command history of the current user including command times for zsh.
+    get_command_history：获取当前用户的命令历史（包括 zsh 的命令时间）。
 
-    :return: A list of dictionaries with 'command' and optionally 'time' keys, where 'time' is in datetime format.
+    返回值：包含 'command' 和可选 'time' 键的字典列表，'time' 为日期时间格式。
     """
     if sys.platform.startswith('linux') or sys.platform == 'darwin':
-        # Attempt to detect the default shell from the $SHELL environment variable or /etc/passwd
+        # 尝试从 $SHELL 环境变量或 /etc/passwd 检测默认 shell
         import pwd
         shell = os.environ.get('SHELL', pwd.getpwnam(getpass.getuser()).pw_shell)
 
@@ -336,13 +336,13 @@ def get_command_history():
         with open(history_file, 'rb') as file:  # Open as binary to handle potential non-UTF characters
             for line in file:
                 try:
-                    # Decode each line individually, replace errors
+                    # 逐行解码，遇到错误则替换
                     decoded_line = line.decode('utf-8', 'replace').strip()
                     if history_format == 'with_time' and shell_type == 'zsh':
-                        # Regex to parse zsh history with timestamps
+                        # 用正则解析带时间戳的 zsh 历史记录
                         match = re.match(r'^: (\d+):\d+;(.*)', decoded_line)
                         if match:
-                            # Convert epoch time to datetime object and format it
+                            # 将 epoch 时间戳转换为 datetime 对象并格式化
                             epoch_time = int(match.group(1))
                             datetime_obj = datetime.fromtimestamp(epoch_time)
                             formatted_time = datetime_obj.strftime('%Y-%m-%d %H:%M:%S')
@@ -367,9 +367,9 @@ def get_command_history():
                     else:
                         history_lines.append({'command': decoded_line, 'time': None})
                 except UnicodeDecodeError:
-                    # In case decoding fails, skip the line or handle appropriately
+                    # 如果解码失败，跳过该行或做相应处理
                     continue
-            # Return all commands
+            # 返回所有命令
             return {"shell_command_history": history_lines[::-1]}
     except Exception as e:
         return f"Failed to read history file: {e}"

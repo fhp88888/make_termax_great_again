@@ -13,6 +13,7 @@ from termax.utils import Config, CONFIG_HOME
 
 
 class Memory:
+    # 初始化 Memory 类，设置数据存储路径和嵌入模型
     def __init__(
             self,
             data_path: str = CONFIG_HOME,
@@ -29,7 +30,7 @@ class Memory:
         self.config = Config().read()
         self.client = chromadb.PersistentClient(path=os.path.join(data_path, DB_PATH))
 
-        # use the OpenAI embedding function if the openai section is set in the configuration.
+        # 如果配置中设置了 openai 部分，则使用 OpenAI 的 embedding 函数。
         if self.config.get(CONFIG_SEC_OPENAI, None):
             self.client.get_or_create_collection(
                 DB_COMMAND_HISTORY,
@@ -41,6 +42,7 @@ class Memory:
         else:
             self.client.get_or_create_collection(DB_COMMAND_HISTORY)
 
+    # 向指定集合中添加查询及其响应，返回生成的ID列表
     def add_query(
             self,
             queries: List[Dict[str, str]],
@@ -69,7 +71,7 @@ class Memory:
         query_list = [query['query'] for query in queries]
         added_time = datetime.now().isoformat()
         resp_list = [{'response': query['response'], 'created_at': added_time} for query in queries]
-        # insert the record into the database
+        # 将记录插入数据库
         self.client.get_or_create_collection(collection).add(
             documents=query_list,
             metadatas=resp_list,
@@ -78,6 +80,7 @@ class Memory:
 
         return ids
 
+    # 在指定集合中检索与输入文本最相关的若干条记录
     def query(self, query_texts: List[str], collection: str = DB_COMMAND_HISTORY, n_results: int = 5):
         """
         query: query the memery.
@@ -90,6 +93,7 @@ class Memory:
         """
         return self.client.get_or_create_collection(collection).query(query_texts=query_texts, n_results=n_results)
 
+    # 查看指定集合中的前若干条记录
     def peek(self, collection: str = DB_COMMAND_HISTORY, n_results: int = 20):
         """
         peek: peek the memery.
@@ -101,6 +105,7 @@ class Memory:
         """
         return self.client.get_or_create_collection(collection).peek(limit=n_results)
 
+    # 根据ID获取指定集合中的记录，若未指定ID则返回全部
     def get(self, record_id: str = None, collection: str = DB_COMMAND_HISTORY):
         """
         get: get the record by the id.
@@ -116,6 +121,7 @@ class Memory:
 
         return collection.get(record_id)
 
+    # 删除指定名称的集合
     def delete(self, collection_name: str = DB_COMMAND_HISTORY):
         """
         delete: delete the memery collections.
@@ -124,6 +130,7 @@ class Memory:
         """
         return self.client.delete_collection(name=collection_name)
 
+    # 统计指定集合中的记录数量
     def count(self, collection_name: str = DB_COMMAND_HISTORY):
         """
         count: count the number of records in the memery.
@@ -133,6 +140,7 @@ class Memory:
 
         return self.client.get_collection(name=collection_name).count()
 
+    # 重置所有内存数据（需设置环境变量 ALLOW_RESET 为 TRUE）
     def reset(self):
         """
         reset: reset the memory.

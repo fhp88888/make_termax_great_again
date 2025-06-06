@@ -1,3 +1,7 @@
+# termax.plugin.uninstall
+# 提供 Zsh、Bash、Fish 三种 shell 的插件卸载功能，支持自动从用户配置文件移除插件脚本。
+# 通过 uninstall_plugin(plugin_name) 统一入口，根据插件名选择对应 shell 的卸载逻辑。
+
 import os
 from pathlib import Path
 from rich.console import Console

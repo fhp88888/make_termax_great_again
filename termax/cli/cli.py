@@ -13,9 +13,11 @@ memory = Memory()
 os.environ['TOKENIZERS_PARALLELISM'] = 'false'
 
 
+# 自定义 Click 命令组，允许为命令组设置默认命令
 class DefaultCommandGroup(click.Group):
-    """allow a default command for a group"""
+    """允许为一个命令组设置默认命令"""
 
+    # 命令装饰器，支持设置默认命令
     def command(self, *args, **kwargs):
         """
         command: the command decorator for the group.
@@ -36,6 +38,7 @@ class DefaultCommandGroup(click.Group):
 
         return decorator
 
+    # 解析命令，如果未匹配到则使用默认命令
     def resolve_command(self, ctx, args):
         """
         resolve_command: resolve the command.
@@ -51,6 +54,7 @@ class DefaultCommandGroup(click.Group):
 
 @click.group(cls=DefaultCommandGroup)
 @click.version_option(version=termax.__version__)
+# Termax 主命令入口，初始化 CLI 工具
 def cli():
     """
     Termax: A CLI tool to generate and execute commands from natural language.
@@ -59,6 +63,7 @@ def cli():
 
 
 @cli.command()
+# 猜测用户意图并生成推荐命令，支持复制、解释、执行和修订
 def guess():
     """
     Guess the next command based on the information provided.
@@ -126,6 +131,7 @@ def guess():
 @cli.command(default_command=True)
 @click.argument('text', nargs=-1)
 @click.option('--print_cmd', '-p', is_flag=True, help="Print the generated command only.")
+# 根据用户输入调用大模型生成命令，并可选择直接执行或仅打印
 def generate(text, print_cmd=False):
     """
     This function will call and generate the commands from LLM
@@ -205,6 +211,7 @@ def generate(text, print_cmd=False):
 
 @cli.command()
 @click.option('--general', '-g', is_flag=True, help="Set up the general configuration for Termax.")
+# 配置 Termax 全局参数，支持通用配置
 def config(general):
     """
     Set up the global configuration for Termax.
@@ -214,6 +221,7 @@ def config(general):
 
 @cli.command()
 @click.option('--name', '-n', type=str, required=True, help='Name of the plugin to install')
+# 安装指定名称的插件
 def install(name: str):
     """
     Install the plugin.
@@ -225,6 +233,7 @@ def install(name: str):
 
 @cli.command()
 @click.option('--name', '-n', type=str, required=True, help='Name of the plugin to uninstall')
+# 卸载指定名称的插件
 def uninstall(name: str):
     """
     Uninstall the plugin.
@@ -236,6 +245,7 @@ def uninstall(name: str):
 
 @cli.command()
 @click.option('--clear', '-c', is_flag=True, help="Clear the memory.")
+# 查看或清除历史命令（RAG 记忆），可用于回顾或重置命令历史
 def rag(clear: bool = False):
     """
     Show all the historical commands in the RAG.

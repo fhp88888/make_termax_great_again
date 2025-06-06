@@ -1,3 +1,7 @@
+# termax.plugin.install
+# 提供 Zsh、Bash、Fish 三种 shell 的插件安装功能，支持自动向用户配置文件追加插件脚本。
+# 通过 install_plugin(plugin_name) 统一入口，根据插件名选择对应 shell 的安装逻辑。
+
 import os
 from pathlib import Path
 from rich.console import Console

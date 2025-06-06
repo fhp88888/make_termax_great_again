@@ -1,3 +1,6 @@
+# termax.plugin.shell.fish
+# 定义 Fish 插件脚本内容及函数，实现 Ctrl+k 快捷键调用 termax 处理命令行并显示进度动画。
+
 fish_function = """
 # ====== Termax Fish Plugin ======
 function termax_fish

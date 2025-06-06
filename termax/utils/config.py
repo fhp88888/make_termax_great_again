@@ -10,7 +10,7 @@ CONFIG_PATH = os.path.join(CONFIG_HOME, "config")
 
 class Config:
     """
-    Config: the overall system configuration for Termax.
+    Config：Termax 的整体系统配置类。
     """
 
     def __init__(self):
@@ -25,9 +25,9 @@ class Config:
 
     def read(self):
         """
-        read: read the configuration file.
+        read：读取配置文件。
 
-        Returns: a dictionary of the configuration.
+        返回值：配置字典。
         """
         self.reload_config(CONFIG_PATH)
         config_dict = {}
@@ -40,16 +40,16 @@ class Config:
 
     def reload_config(self, config_path):
         """
-        reload_config: The default configuration will load ~/.termax/config, if user want to specify
-        customize, the method is required.
+        reload_config：默认会加载 ~/.termax/config，如需自定义配置文件路径需调用此方法。
 
-        @param config_path: the path of new configuration file.
+        参数:
+            config_path: 新配置文件的路径。
         """
         self.config.read(config_path)
 
     def load_openai_config(self):
         """
-        load_openai_config: load a OpenAI configuration when required.
+        load_openai_config：按需加载 OpenAI 配置。
         """
         if self.config.has_section(CONFIG_SEC_OPENAI):
             return self.config[CONFIG_SEC_OPENAI]
@@ -58,9 +58,10 @@ class Config:
 
     def write_general(self, config_dict: dict):
         """
-        write_general: write the general configuration.
+        write_general：写入通用配置。
 
-        @param config_dict: the configuration dictionary.
+        参数:
+            config_dict: 配置字典。
 
         """
         if not self.config.has_section(CONFIG_SEC_GENERAL):
@@ -68,7 +69,7 @@ class Config:
 
         self.config[CONFIG_SEC_GENERAL] = config_dict
 
-        # save the new configuration and reload.
+        # 保存新配置并重新加载。
         with open(self.config_path, 'w') as configfile:
             self.config.write(configfile)
             self.reload_config(self.config_path)
@@ -79,20 +80,21 @@ class Config:
             platform: str = CONFIG_SEC_OPENAI
     ):
         """
-        write_platform: indicate and generate the platform related configuration.
+        write_platform：生成并写入平台相关配置。
 
-        @param config_dict: the configuration dictionary.
-        @param platform: the platform to configure.
+        参数:
+            config_dict: 配置字典。
+            platform: 要配置的平台。
 
         """
         del config_dict['platform']
-        # create the configuration to connect with OpenAI.
+        # 创建用于连接 OpenAI 的配置。
         if not self.config.has_section(platform):
             self.config.add_section(platform)
 
         self.config[platform] = config_dict
 
-        # save the new configuration and reload.
+        # 保存新配置并重新加载。
         with open(self.config_path, 'w') as configfile:
             self.config.write(configfile)
             self.reload_config(self.config_path)
